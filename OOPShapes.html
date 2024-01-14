@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shapes in JavaScript</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+        }
+
+        div {
+            margin-bottom: 10px;
+        }
+
+        label {
+            margin-right: 10px;
+        }
+
+        input, select {
+            margin-bottom: 10px;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        #output {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <label for="shapeType">Select Shape Type:</label>
+        <select id="shapeType" onchange="initializeParameters()">
+            <option value="" disabled selected>Select Shape</option>
+            <option value="circle">Circle</option>
+            <option value="square">Square</option>
+            <option value="rectangle">Rectangle</option>
+        </select>
+    </div>
+
+    <div id="parameters">
+        <!-- Parameters will be dynamically added here based on the selected shape type -->
+    </div>
+
+    <div>
+        <button onclick="calculateProperties()">Calculate Properties</button>
+        <button onclick="clearOutput()">Clear</button>
+    </div>
+
+    <div>
+        <label for="enlargementFactor">Enlargement Factor (positive):</label>
+        <input type="number" id="enlargementFactor" value="2" min="0">
+        <button onclick="enlargeShape()">Enlarge Shape</button>
+    </div>
+
+    <div>
+        <label for="shrinkFactor">Shrink Factor (positive):</label>
+        <input type="number" id="shrinkFactor" value="2" min="0">
+        <button onclick="shrinkShape()">Shrink Shape</button>
+    </div>
+
+    <div id="output"></div>
+
+    <script>
+        class ShapeDescriptor {
+            static describe(shape) {
+                const shapeType = shape.constructor.name;
+                const area = shape.calculateArea();
+                const circumference = shape.calculateCircumference();
+                const description = `The shape is ${shapeType} that has an area of ${area} and a circumference of ${circumference}`;
+                
+                // Output the description to the HTML
+                document.getElementById('output').innerHTML += `<p>${description}</p>`;
+            }
+        }
+
+        class Circle {
+            constructor(radius) {
+                this.radius = radius;
+            }
+
+            calculateArea() {
+                return Math.PI * this.radius ** 2;
+            }
+
+            calculateCircumference() {
+                return 2 * Math.PI * this.radius;
+            }
+
+            enlarge(scale) {
+                this.radius *= scale;
+            }
+
+            shrink(scale) {
+                this.radius /= scale;
+            }
+        }
+
+        class Square {
+            constructor(sides) {
+                this.sides = sides;
+            }
+
+            calculateArea() {
+                return this.sides ** 2;
+            }
+
+            calculateCircumference() {
+                return 4 * this.sides;
+            }
+
+            enlarge(scale) {
+                this.sides *= scale;
+            }
+
+            shrink(scale) {
+                this.sides /= scale;
+            }
+        }
+
+        class Rectangle {
+            constructor(length, width) {
+                this.length = length;
+                this.width = width;
+            }
+
+            calculateArea() {
+                return this.length * this.width;
+            }
+
+            calculateCircumference() {
+                return 2 * (this.length + this.width);
+            }
+
+            enlarge(scale) {
+                this.length *= scale;
+                this.width *= scale;
+            }
+
+            shrink(scale) {
+                this.length /= scale;
+                this.width /= scale;
+            }
+        }
+
+        function initializeParameters() {
+            const shapeType = document.getElementById('shapeType').value;
+            const parametersDiv = document.getElementById('parameters');
+
+            // Clear previous parameters
+            parametersDiv.innerHTML = '';
+
+            if (shapeType) {
+                switch (shapeType) {
+                    case 'circle':
+                        parametersDiv.innerHTML += '<label for="circleRadius">Circle Radius:</label>';
+                        parametersDiv.innerHTML += '<input type="number" id="circleRadius" value="5" min="0">';
+                        break;
+                    case 'square':
+                        parametersDiv.innerHTML += '<label for="squareSides">Square Sides:</label>';
+                        parametersDiv.innerHTML += '<input type="number" id="squareSides" value="8" min="0">';
+                        break;
+                    case 'rectangle':
+                        parametersDiv.innerHTML += '<label for="rectangleLength">Rectangle Length:</label>';
+                        parametersDiv.innerHTML += '<input type="number" id="rectangleLength" value="6" min="0">';
+                        parametersDiv.innerHTML += '<label for="rectangleWidth">Rectangle Width:</label>';
+                        parametersDiv.innerHTML += '<input type="number" id="rectangleWidth" value="4" min="0">';
+                        break;
+                }
+            }
+        }
+
+        function calculateProperties() {
+            const shapeType = document.getElementById('shapeType').value;
+
+            switch (shapeType) {
+                case 'circle':
+                    const circleRadius = parseFloat(document.getElementById('circleRadius').value);
+                    if (!isNaN(circleRadius) && circleRadius >= 0) {
+                        const circle = new Circle(circleRadius);
+                        ShapeDescriptor.describe(circle);
+                    } else {
+                        alert('Please enter a valid non-negative number for the radius.');
+                    }
+                    break;
+                case 'square':
+                    const squareSides = parseFloat(document.getElementById('squareSides').value);
+                    if (!isNaN(squareSides) && squareSides >= 0) {
+                        const square = new Square(squareSides);
+                        ShapeDescriptor.describe(square);
+                    } else {
+                        alert('Please enter a valid non-negative number for the sides.');
+                    }
+                    break;
+                case 'rectangle':
+                    const rectangleLength = parseFloat(document.getElementById('rectangleLength').value);
+                    const rectangleWidth = parseFloat(document.getElementById('rectangleWidth').value);
+                    if (!isNaN(rectangleLength) && rectangleLength >= 0 && !isNaN(rectangleWidth) && rectangleWidth >= 0) {
+                        const rectangle = new Rectangle(rectangleLength, rectangleWidth);
+                        ShapeDescriptor.describe(rectangle);
+                    } else {
+                        alert('Please enter valid non-negative numbers for the length and width.');
+                    }
+                    break;
+                default:
+                    alert('Please select a shape before calculating properties.');
+            }
+        }
+
+        function enlargeShape() {
+            const shapeType = document.getElementById('shapeType').value;
+            const enlargementFactor = parseFloat(document.getElementById('enlargementFactor').value);
+
+            if (!isNaN(enlargementFactor) && enlargementFactor >= 0) {
+                let shape;
+
+                switch (shapeType) {
+                    case 'circle':
+                        const circleRadius = parseFloat(document.getElementById('circleRadius').value);
+                        if (!isNaN(circleRadius) && circleRadius >= 0) {
+                            shape = new Circle(circleRadius);
+                        } else {
+                            alert('Please enter a valid non-negative number for the radius.');
+                        }
+                        break;
+                    case 'square':
+                        const squareSides = parseFloat(document.getElementById('squareSides').value);
+                        if (!isNaN(squareSides) && squareSides >= 0) {
+                            shape = new Square(squareSides);
+                        } else {
+                            alert('Please enter a valid non-negative number for the sides.');
+                        }
+                        break;
+                    case 'rectangle':
+                        const rectangleLength = parseFloat(document.getElementById('rectangleLength').value);
+                        const rectangleWidth = parseFloat(document.getElementById('rectangleWidth').value);
+                        if (!isNaN(rectangleLength) && rectangleLength >= 0 && !isNaN(rectangleWidth) && rectangleWidth >= 0) {
+                            shape = new Rectangle(rectangleLength, rectangleWidth);
+                        } else {
+                            alert('Please enter valid non-negative numbers for the length and width.');
+                        }
+                        break;
+                }
+
+                if (shape) {
+                    shape.enlarge(enlargementFactor);
+                    ShapeDescriptor.describe(shape);
+                }
+            } else {
+                alert('Please enter a valid non-negative enlargement factor.');
+            }
+        }
+
+        function shrinkShape() {
+            const shapeType = document.getElementById('shapeType').value;
+            const shrinkFactor = parseFloat(document.getElementById('shrinkFactor').value);
+
+            if (!isNaN(shrinkFactor) && shrinkFactor >= 0) {
+                let shape;
+
+                switch (shapeType) {
+                    case 'circle':
+                        const circleRadius = parseFloat(document.getElementById('circleRadius').value);
+                        if (!isNaN(circleRadius) && circleRadius >= 0) {
+                            shape = new Circle(circleRadius);
+                        } else {
+                            alert('Please enter a valid non-negative number for the radius.');
+                        }
+                        break;
+                    case 'square':
+                        const squareSides = parseFloat(document.getElementById('squareSides').value);
+                        if (!isNaN(squareSides) && squareSides >= 0) {
+                            shape = new Square(squareSides);
+                        } else {
+                            alert('Please enter a valid non-negative number for the sides.');
+                        }
+                        break;
+                    case 'rectangle':
+                        const rectangleLength = parseFloat(document.getElementById('rectangleLength').value);
+                        const rectangleWidth = parseFloat(document.getElementById('rectangleWidth').value);
+                        if (!isNaN(rectangleLength) && rectangleLength >= 0 && !isNaN(rectangleWidth) && rectangleWidth >= 0) {
+                            shape = new Rectangle(rectangleLength, rectangleWidth);
+                        } else {
+                            alert('Please enter valid non-negative numbers for the length and width.');
+                        }
+                        break;
+                }
+
+                if (shape) {
+                    shape.shrink(shrinkFactor);
+                    ShapeDescriptor.describe(shape);
+                }
+            } else {
+                alert('Please enter a valid non-negative shrink factor.');
+            }
+        }
+
+        function clearOutput() {
+            document.getElementById('output').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
